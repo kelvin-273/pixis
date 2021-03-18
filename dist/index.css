@@ -1,0 +1,18 @@
+body {
+    background-color: green;
+    align-content: center;
+}
+
+canvas {
+    height: 35rem;
+    width: 35rem;
+    background-color: lightblue;
+}
+
+.square1 {
+    background-color: black;
+}
+
+.square0 {
+    background-color: white;
+}

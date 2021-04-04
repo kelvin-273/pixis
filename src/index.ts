@@ -66,6 +66,29 @@ function getIndex(pos: MousePos) {
     }
 }
 
+function saveFile(table: Table, filename: string) {
+    console.log('called saveFile');
+    
+    let s = '';
+    for (let i = 0; i < table.length; i++) {
+        for (let j = 0; j < table.length; j++) {
+            s += table[i][j];
+        }
+        s += '\n'
+    }
+    var myBlob = new Blob([s], {type: 'text/plain'});
+
+    // (B) CREATE DOWNLOAD LINK
+    var url = window.URL.createObjectURL(myBlob);
+    var anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = "HelloWorld.txt";
+
+    anchor.click();
+    window.URL.revokeObjectURL(url);
+    document.removeChild(anchor);
+}
+
 // create canvas
 var svg = document.createElement('canvas');
 svg.setAttribute('width', '' + (GAP_SIZE + (PIXEL_SIZE + GAP_SIZE) * SIZE) + '');
@@ -80,6 +103,12 @@ for (let i = 0; i < arr.length; i++) {
         drawPixel(ctx, arr, i, j);
     }    
 }
+
+// create button to save file
+const butt = document.getElementById('button')!;
+butt.addEventListener('click', (_) => saveFile(arr, 'test.txt'));
+
+// TODO: create button to start fresh
 
 // create the Observable streams
 const mouseDown$: Observable<Event> = fromEvent(document, 'mousedown');

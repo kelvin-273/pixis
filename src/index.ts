@@ -42,7 +42,7 @@ function updatePixel(
     let y = GAP_SIZE + (PIXEL_SIZE + GAP_SIZE) * j;
     ctx.clearRect(x, y, PIXEL_SIZE, PIXEL_SIZE);
     ctx.fillRect(x, y, PIXEL_SIZE, PIXEL_SIZE);
-    ctx.fillStyle = table[i][j] === 1 ? '#FFF' : '#000';
+    ctx.fillStyle = value === 1 ? '#FFF' : '#000';
     ctx.fill();
     ctx.closePath();
 }

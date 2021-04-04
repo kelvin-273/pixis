@@ -4,7 +4,5 @@ body {
 }
 
 canvas {
-    height: 35rem;
-    width: 35rem;
     background-color: lightblue;
 }

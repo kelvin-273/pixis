@@ -1,11 +1,14 @@
-import { Observable, interval, fromEvent, animationFrameScheduler } from "rxjs";
-import { mergeMap, takeUntil } from 'rxjs/operators';
+import { Observable, interval, fromEvent, animationFrameScheduler, from, merge } from "rxjs";
+import { last, map, mergeMap, publishLast, takeUntil, tap, withLatestFrom } from 'rxjs/operators';
 
 const SIZE = 28;
-const PIXEL_SIZE = 20;
-const GAP_SIZE = 2;
+const PIXEL_SIZE = 10;
+const GAP_SIZE = 1;
 
 type Table = Array<Array<number>>;
+type Color = number;
+interface MousePos {x: number, y: number};
+interface MouseIdx {i: number, j: number};
 
 function initTable(size:number): Table {
     // creates a nxn array
@@ -19,7 +22,7 @@ function initTable(size:number): Table {
     return arr;
 }
 
-function draw_pixel(
+function drawPixel(
     ctx: CanvasRenderingContext2D, table: Table, i: number, j: number
 ) {
     let x = GAP_SIZE + (PIXEL_SIZE + GAP_SIZE) * i;
@@ -29,6 +32,38 @@ function draw_pixel(
     ctx.fillStyle = table[i][j] === 1 ? '#FFF' : '#000';
     ctx.fill();
     ctx.closePath();
+}
+
+function updatePixel(
+    ctx: CanvasRenderingContext2D, table: Table, i: number, j: number, value: number
+) {
+    table[i][j] = value;
+    let x = GAP_SIZE + (PIXEL_SIZE + GAP_SIZE) * i;
+    let y = GAP_SIZE + (PIXEL_SIZE + GAP_SIZE) * j;
+    ctx.clearRect(x, y, PIXEL_SIZE, PIXEL_SIZE);
+    ctx.fillRect(x, y, PIXEL_SIZE, PIXEL_SIZE);
+    ctx.fillStyle = table[i][j] === 1 ? '#FFF' : '#000';
+    ctx.fill();
+    ctx.closePath();
+}
+
+function getColor(svg: HTMLElement, table: Table, e: MouseEvent) {
+    const z = getIndex(getMouse(svg, e));
+    return table[z.i][z.j]
+}
+
+function getMouse(svg:HTMLElement, e: MouseEvent): MousePos {
+    return {
+        x: e.pageX - svg.getBoundingClientRect().left,
+        y: e.pageY - svg.getBoundingClientRect().top
+    }
+}
+
+function getIndex(pos: MousePos) {
+    return {
+        i: Math.floor(pos.x / (PIXEL_SIZE + GAP_SIZE)),
+        j: Math.floor(pos.y / (PIXEL_SIZE + GAP_SIZE)),
+    }
 }
 
 // create canvas
@@ -42,24 +77,31 @@ var ctx = svg.getContext('2d')!;
 const arr = initTable(SIZE);
 for (let i = 0; i < arr.length; i++) {
     for (let j = 0; j < arr.length; j++) {
-        draw_pixel(ctx, arr, i, j);
+        drawPixel(ctx, arr, i, j);
     }    
 }
 
 // create the Observable streams
-const mouseDownObs$ = fromEvent(svg, 'mousedown');
-const mouseUpObs$ = fromEvent(svg, 'mouseup');
-const mouseMoveObs$ = fromEvent(svg, 'mousemove');
-const obs$: Observable<number> = interval(1000);
+const mouseDown$: Observable<Event> = fromEvent(document, 'mousedown');
+const mouseUp$: Observable<Event> = fromEvent(document, 'mouseup');
+const mouseMove$: Observable<Event> = fromEvent(document, 'mousemove');
+const clickAndDrag: Observable<Event> = merge(mouseDown$, mouseMove$);
 const frames$: Observable<number> = interval(0, animationFrameScheduler);
 
-// create a chain: mousedown -> mousemove -> mouseup
-mouseDownObs$.subscribe((_) => console.log("there we go!"));
-mouseDownObs$.pipe(
-    mergeMap((_) => mouseMoveObs$.pipe(takeUntil(mouseUpObs$)))
-).subscribe(console.log);
-mouseUpObs$.subscribe((_) => console.log("DROP THE MOUSE!"));
-
-// time dependent streams
-//obs.pipe(takeUntil(mouseUpObs)).subscribe(console.log);
-//frames$.pipe(takeUntil(mouseUpObs)).subscribe(console.log);
+mouseDown$.pipe(
+    // get colour
+    map((e) => {
+        const _e = e as MouseEvent;
+        return (getColor(svg, arr, _e) + 1) % 2;
+    }),
+    // line up clickAndDrag events with the animation frames
+    mergeMap((c: Color) => frames$.pipe(
+        withLatestFrom(
+            clickAndDrag, (tick, move) => {
+                const e = move as MouseEvent;
+                return { ...getIndex(getMouse(svg, e)), value: c };
+            }
+        ),
+        takeUntil(mouseUp$),
+    )),
+    ).subscribe(({i, j, value}) => updatePixel(ctx, arr, i, j, value));

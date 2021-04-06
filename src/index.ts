@@ -59,7 +59,7 @@ function getMouse(svg:HTMLElement, e: MouseEvent): MousePos {
     }
 }
 
-function getIndex(pos: MousePos) {
+function getIndex(pos: MousePos): MouseIdx {
     return {
         i: Math.floor(pos.x / (PIXEL_SIZE + GAP_SIZE)),
         j: Math.floor(pos.y / (PIXEL_SIZE + GAP_SIZE)),
@@ -82,7 +82,7 @@ function saveFile(table: Table, filename: string) {
     var url = window.URL.createObjectURL(myBlob);
     var anchor = document.createElement("a");
     anchor.href = url;
-    anchor.download = "HelloWorld.txt";
+    anchor.download = filename;
 
     anchor.click();
     window.URL.revokeObjectURL(url);
@@ -114,7 +114,7 @@ butt.addEventListener('click', (_) => saveFile(arr, 'test.txt'));
 const mouseDown$: Observable<Event> = fromEvent(document, 'mousedown');
 const mouseUp$: Observable<Event> = fromEvent(document, 'mouseup');
 const mouseMove$: Observable<Event> = fromEvent(document, 'mousemove');
-const clickAndDrag: Observable<Event> = merge(mouseDown$, mouseMove$);
+const clickAndDrag$: Observable<Event> = merge(mouseDown$, mouseMove$);
 const frames$: Observable<number> = interval(0, animationFrameScheduler);
 
 mouseDown$.pipe(
@@ -124,9 +124,8 @@ mouseDown$.pipe(
         return (getColor(svg, arr, _e) + 1) % 2;
     }),
     // line up clickAndDrag events with the animation frames
-    mergeMap((c: Color) => frames$.pipe(
-        withLatestFrom(
-            clickAndDrag, (tick, move) => {
+    mergeMap((c: Color) => clickAndDrag$.pipe(
+        map((move) => {
                 const e = move as MouseEvent;
                 return { ...getIndex(getMouse(svg, e)), value: c };
             }

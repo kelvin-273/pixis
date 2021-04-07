@@ -105,8 +105,8 @@ for (let i = 0; i < arr.length; i++) {
 }
 
 // create button to save file
-const butt = document.getElementById('button')!;
-butt.addEventListener('click', (_) => saveFile(arr, 'test.txt'));
+const button = document.getElementById('button')!;
+button.addEventListener('click', (_) => saveFile(arr, 'test.txt'));
 
 // TODO: create button to start fresh
 
@@ -126,10 +126,9 @@ mouseDown$.pipe(
     // line up clickAndDrag events with the animation frames
     mergeMap((c: Color) => clickAndDrag$.pipe(
         map((move) => {
-                const e = move as MouseEvent;
-                return { ...getIndex(getMouse(svg, e)), value: c };
-            }
-        ),
+            const e = move as MouseEvent;
+            return { ...getIndex(getMouse(svg, e)), value: c };
+        }),
         takeUntil(mouseUp$),
     )),
-    ).subscribe(({i, j, value}) => updatePixel(ctx, arr, i, j, value));
+).subscribe(({i, j, value}) => updatePixel(ctx, arr, i, j, value));

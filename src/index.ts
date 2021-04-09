@@ -1,5 +1,8 @@
 import { Observable, interval, fromEvent, animationFrameScheduler, from, merge } from "rxjs";
 import { last, map, mergeMap, publishLast, takeUntil, tap, withLatestFrom } from 'rxjs/operators';
+import { runInference } from './ann';
+import net from './net.json';
+
 
 const SIZE = 28;
 const PIXEL_SIZE = 10;

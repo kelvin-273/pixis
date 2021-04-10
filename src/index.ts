@@ -2,7 +2,11 @@ import { Observable, interval, fromEvent, animationFrameScheduler, from, merge }
 import { last, map, mergeMap, publishLast, takeUntil, tap, withLatestFrom } from 'rxjs/operators';
 import { runInference } from './ann';
 import net from './net.json';
+import * as sonic from 'sonic';
 
+console.log(sonic.greet());
+console.log(sonic.new_vec(10));
+console.log(sonic.vinvout(new Int32Array([2,3,4])));
 
 const SIZE = 28;
 const PIXEL_SIZE = 10;

@@ -3,7 +3,7 @@ import { Observable, interval, fromEvent, animationFrameScheduler, from, merge }
 import { last, map, mergeMap, publishLast, takeUntil, tap, withLatestFrom } from 'rxjs/operators';
 import { runInference } from './ann';
 import net from './net.json';
-import { FCNN } from '../NN-SVG/FCNN.js';
+import { FCNN } from './FCNN.js';
 
 const SIZE = 28;
 const PIXEL_SIZE = 10;

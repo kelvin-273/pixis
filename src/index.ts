@@ -1,8 +1,9 @@
+import * as d3 from 'd3';
 import { Observable, interval, fromEvent, animationFrameScheduler, from, merge } from "rxjs";
 import { last, map, mergeMap, publishLast, takeUntil, tap, withLatestFrom } from 'rxjs/operators';
 import { runInference } from './ann';
 import net from './net.json';
-
+import { FCNN } from '../NN-SVG/FCNN.js';
 
 const SIZE = 28;
 const PIXEL_SIZE = 10;
@@ -134,3 +135,23 @@ mouseDown$.pipe(
         takeUntil(mouseUp$),
     )),
 ).subscribe(({i, j, value}) => updatePixel(ctx, arr, i, j, value));
+
+// Generate SVG
+var fcnn = FCNN();
+function restart() {
+
+    let architecture = [17, 17, 10];
+
+    let betweenNodesInLayer = [20, 20, 20];
+
+    fcnn.redraw({'architecture_':architecture, 'showBias_': true, 'showLabels_': false});
+    fcnn.redistribute({'betweenNodesInLayer_':betweenNodesInLayer});
+
+}
+
+restart();
+restart();
+//
+console.log(fcnn);
+
+export { fcnn as output };

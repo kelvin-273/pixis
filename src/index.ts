@@ -1,9 +1,10 @@
 import * as d3 from 'd3';
 import { Observable, interval, fromEvent, animationFrameScheduler, from, merge } from "rxjs";
-import { last, map, mergeMap, publishLast, takeUntil, tap, withLatestFrom } from 'rxjs/operators';
+import { last, map, mergeMap, publishLast, takeUntil, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
 import { inferenceRecord, ANN, ANNExec } from './ann';
 import net from './net.json';
 import { FCNN } from './FCNN.js';
+import * as sonic from 'sonic';
 
 const SIZE = 28;
 const PIXEL_SIZE = 10;
@@ -161,5 +162,10 @@ restart(annRec);
 console.log(fcnn);
 
 mouseUp$.subscribe((_) => restart(inferenceRecord(net, arr)));
+
+frames$.pipe(
+    throttleTime(20),
+    map((_) => sonic.fast_predict(new Float32Array(arr)))
+).subscribe(console.log);
 
 export { fcnn as output };

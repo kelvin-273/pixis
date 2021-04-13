@@ -78,4 +78,4 @@ function runInference(net:ANN, table:Matrix): ANNExec {
 //console.log(linear([4, 3], [2, 1], 5));
 //console.log(table2Vector([[4,3,6], [7,3,5]]))
 
-export { runInference, ANN, ANNExec };
+export { inferenceRecord, ANN, ANNExec };

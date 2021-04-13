@@ -78,15 +78,32 @@ function FCNN() {
 
     function redraw({architecture_=architecture,
                      showBias_=showBias,
-                     showLabels_=showLabels}={}) {
+                     showLabels_=showLabels,
+                     annexec_={}}={}) {
 
         architecture = architecture_;
         showBias = showBias_;
         showLabels = showLabels_;
 
         graph.nodes = architecture.map((layer_width, layer_index) => range(layer_width).map(node_index => {return {'id':layer_index+'_'+node_index,'layer':layer_index,'node_index':node_index}}));
-        console.table(graph.nodes);
-        graph.links = pairWise(graph.nodes).map((nodes) => nodes[0].map(left => nodes[1].map(right => {return right.node_index >= 0 ? {'id':left.id+'-'+right.id, 'source':left.id,'target':right.id,'weight':randomWeight()} : null })));
+        console.log(graph.nodes);
+        graph.links = pairWise(graph.nodes).map((nodes) => nodes[0].map(left => nodes[1].map(right => {
+            return right.node_index >= 0 ? {
+                'id': left.id+'-'+right.id,
+                'source': left.id,
+                'target': right.id,
+                'weight': (() => {
+                    if (left.layer !== architecture.length - 1) {alert("left can take last value")}
+                    if (left.node_index === 0) {
+                        // take the bias
+                        return annexec_.biases[left.layer][right.node_index-1];
+                    } else {
+                        // take the weight
+                        return annexec_.edgeValues[left.layer][left.node_index-1][right.node_index-1];
+                    }
+                })(),
+            } : null 
+        })));
         graph.nodes = flatten(graph.nodes);
         graph.links = flatten(graph.links).filter(l => (l && (showBias ? (parseInt(l['target'].split('_')[0]) !== architecture.length-1 ? (l['target'].split('_')[1] !== '0') : true) : true)));
 
@@ -160,19 +177,21 @@ function FCNN() {
 
     }
 
-    function style({edgeWidthProportional_=edgeWidthProportional,
-                    edgeWidth_=edgeWidth,
-                    edgeOpacityProportional_=edgeOpacityProportional,
-                    edgeOpacity_=edgeOpacity,
-                    negativeEdgeColor_=negativeEdgeColor,
-                    positiveEdgeColor_=positiveEdgeColor,
-                    edgeColorProportional_=edgeColorProportional,
-                    defaultEdgeColor_=defaultEdgeColor,
-                    nodeDiameter_=nodeDiameter,
-                    nodeColor_=nodeColor,
-                    nodeBorderColor_=nodeBorderColor,
-                    showArrowheads_=showArrowheads,
-                    arrowheadStyle_=arrowheadStyle}={}) {
+    function style({
+        edgeWidthProportional_=edgeWidthProportional,
+        edgeWidth_=edgeWidth,
+        edgeOpacityProportional_=edgeOpacityProportional,
+        edgeOpacity_=edgeOpacity,
+        negativeEdgeColor_=negativeEdgeColor,
+        positiveEdgeColor_=positiveEdgeColor,
+        edgeColorProportional_=edgeColorProportional,
+        defaultEdgeColor_=defaultEdgeColor,
+        nodeDiameter_=nodeDiameter,
+        nodeColor_=nodeColor,
+        nodeBorderColor_=nodeBorderColor,
+        showArrowheads_=showArrowheads,
+        arrowheadStyle_=arrowheadStyle}={}
+    ) {
         // Edge Width
         edgeWidthProportional   = edgeWidthProportional_;
         edgeWidth               = edgeWidth_;
@@ -203,6 +222,7 @@ function FCNN() {
         });
 
         link.style("stroke", function(d) {
+            console.log(d);
             if (edgeColorProportional) { return weightedEdgeColor(d.weight); } else { return defaultEdgeColor; }
         });
 
@@ -236,9 +256,9 @@ function FCNN() {
                           ///////    Zoom & Resize   ///////
     /////////////////////////////////////////////////////////////////////////////
 
-    svg.call(d3.zoom()
-               .scaleExtent([1 / 2, 8])
-               .on("zoom", zoomed));
+    //svg.call(d3.zoom()
+               //.scaleExtent([1 / 2, 8])
+               //.on("zoom", zoomed));
 
     function zoomed() { g.attr("transform", d3.event.transform); }
 
@@ -248,7 +268,7 @@ function FCNN() {
         svg.attr("width", w).attr("height", h);
     }
 
-    d3.select(window).on("resize", resize)
+    //d3.select(window).on("resize", resize)
 
     resize();
 

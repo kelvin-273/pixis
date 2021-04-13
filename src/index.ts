@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import { Observable, interval, fromEvent, animationFrameScheduler, from, merge } from "rxjs";
 import { last, map, mergeMap, publishLast, takeUntil, tap, withLatestFrom } from 'rxjs/operators';
-import { runInference } from './ann';
+import { inferenceRecord, ANN, ANNExec } from './ann';
 import net from './net.json';
 import { FCNN } from './FCNN.js';
 
@@ -138,20 +138,28 @@ mouseDown$.pipe(
 
 // Generate SVG
 var fcnn = FCNN();
-function restart() {
+function restart(netExec: ANNExec | undefined) {
 
     let architecture = [17, 17, 10];
 
     let betweenNodesInLayer = [20, 20, 20];
 
-    fcnn.redraw({'architecture_':architecture, 'showBias_': true, 'showLabels_': false});
+    fcnn.redraw({
+        'architecture_':architecture,
+        'showBias_': true,
+        'showLabels_': false,
+        'annexec_': netExec
+    });
     fcnn.redistribute({'betweenNodesInLayer_':betweenNodesInLayer});
 
 }
 
-restart();
-restart();
+let annRec: ANNExec = inferenceRecord(net, arr);
+
+restart(annRec);
 //
 console.log(fcnn);
+
+mouseUp$.subscribe((_) => restart(inferenceRecord(net, arr)));
 
 export { fcnn as output };

@@ -1,5 +1,5 @@
 import { Observable, interval, fromEvent, animationFrameScheduler, from, merge } from "rxjs";
-import { last, map, mergeMap, publishLast, takeUntil, tap, withLatestFrom } from 'rxjs/operators';
+import { last, map, mergeMap, publishLast, takeUntil, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
 import { runInference } from './ann';
 import net from './net.json';
 import * as sonic from 'sonic';
@@ -139,3 +139,8 @@ mouseDown$.pipe(
         takeUntil(mouseUp$),
     )),
 ).subscribe(({i, j, value}) => updatePixel(ctx, arr, i, j, value));
+
+frames$.pipe(
+    throttleTime(200),
+    map((_) => sonic.fast_predict(new Float32Array(arr)))
+).subscribe(console.log);

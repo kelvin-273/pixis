@@ -1,30 +1,25 @@
+import * as d3 from 'd3';
 import { Observable, interval, fromEvent, animationFrameScheduler, from, merge } from "rxjs";
 import { last, map, mergeMap, publishLast, takeUntil, tap, throttleTime, withLatestFrom } from 'rxjs/operators';
-import { runInference } from './ann';
+import { inferenceRecord, ANN, ANNExec } from './ann';
 import net from './net.json';
+import { FCNN } from './FCNN.js';
 import * as sonic from 'sonic';
-
-console.log(sonic.greet());
-console.log(sonic.new_vec(10));
-console.log(sonic.vinvout(new Int32Array([2,3,4])));
 
 const SIZE = 28;
 const PIXEL_SIZE = 10;
 const GAP_SIZE = 1;
 
-type Table = Array<Array<number>>;
+type Table = Array<number>;
 type Color = number;
 interface MousePos {x: number, y: number};
 interface MouseIdx {i: number, j: number};
 
 function initTable(size:number): Table {
     // creates a nxn array
-    const arr: Array<Array<number>> = new Array(size);
-    for (let i = 0; i < arr.length; i++) {
-        arr[i] = new Array(size);
-        for (let j = 0; j < arr[i].length; j++) {
-            arr[i][j] = 0;
-        }
+    const arr: Array<number> = new Array(size*size);
+    for (let k = 0; k < SIZE*SIZE; k++) {
+        arr[k] = 0;
     }
     return arr;
 }
@@ -32,11 +27,12 @@ function initTable(size:number): Table {
 function drawPixel(
     ctx: CanvasRenderingContext2D, table: Table, i: number, j: number
 ) {
+    let k = i*SIZE + j;
     let x = GAP_SIZE + (PIXEL_SIZE + GAP_SIZE) * i;
     let y = GAP_SIZE + (PIXEL_SIZE + GAP_SIZE) * j;
     ctx.clearRect(x, y, PIXEL_SIZE, PIXEL_SIZE);
     ctx.fillRect(x, y, PIXEL_SIZE, PIXEL_SIZE);
-    ctx.fillStyle = table[i][j] === 1 ? '#FFF' : '#000';
+    ctx.fillStyle = table[k] === 1 ? '#FFF' : '#000';
     ctx.fill();
     ctx.closePath();
 }
@@ -44,7 +40,8 @@ function drawPixel(
 function updatePixel(
     ctx: CanvasRenderingContext2D, table: Table, i: number, j: number, value: number
 ) {
-    table[i][j] = value;
+    let k = i*SIZE + j;
+    table[k] = value;
     let x = GAP_SIZE + (PIXEL_SIZE + GAP_SIZE) * i;
     let y = GAP_SIZE + (PIXEL_SIZE + GAP_SIZE) * j;
     ctx.clearRect(x, y, PIXEL_SIZE, PIXEL_SIZE);
@@ -56,7 +53,7 @@ function updatePixel(
 
 function getColor(svg: HTMLElement, table: Table, e: MouseEvent) {
     const z = getIndex(getMouse(svg, e));
-    return table[z.i][z.j]
+    return table[z.i*SIZE + z.j]
 }
 
 function getMouse(svg:HTMLElement, e: MouseEvent): MousePos {
@@ -77,9 +74,9 @@ function saveFile(table: Table, filename: string) {
     console.log('called saveFile');
     
     let s = '';
-    for (let i = 0; i < table.length; i++) {
-        for (let j = 0; j < table.length; j++) {
-            s += table[i][j];
+    for (let i = 0; i < SIZE; i++) {
+        for (let j = 0; j < SIZE; j++) {
+            s += table[i*SIZE + j];
         }
         s += '\n'
     }
@@ -140,7 +137,35 @@ mouseDown$.pipe(
     )),
 ).subscribe(({i, j, value}) => updatePixel(ctx, arr, i, j, value));
 
+// Generate SVG
+var fcnn = FCNN();
+function restart(netExec: ANNExec | undefined) {
+
+    let architecture = [17, 17, 10];
+
+    let betweenNodesInLayer = [20, 20, 20];
+
+    fcnn.redraw({
+        'architecture_':architecture,
+        'showBias_': true,
+        'showLabels_': false,
+        'annexec_': netExec
+    });
+    fcnn.redistribute({'betweenNodesInLayer_':betweenNodesInLayer});
+
+}
+
+let annRec: ANNExec = inferenceRecord(net, arr);
+
+restart(annRec);
+//
+console.log(fcnn);
+
+mouseUp$.subscribe((_) => restart(inferenceRecord(net, arr)));
+
 frames$.pipe(
     throttleTime(200),
     map((_) => sonic.fast_predict(new Float32Array(arr)))
 ).subscribe(console.log);
+
+export { fcnn as output };

@@ -27,14 +27,16 @@ function FCNN() {
     var edgeOpacity = 1.0
     var weightedEdgeOpacity = d3.scaleLinear().domain([0, 1]).range([0, 1]);
 
-    var edgeColorProportional = true;
+    var edgeColorProportional = false;
     var defaultEdgeColor = "#505050";
-    var negativeEdgeColor = "#0000ff";
+    var negativeEdgeColor = "#6666ff";
     var positiveEdgeColor = "#ff0000";
     var weightedEdgeColor = d3.scaleLinear().domain([-1, 0, 1]).range([negativeEdgeColor, "white", positiveEdgeColor]);
 
+    var nodeColorProportional = true;
     var nodeDiameter = 20;
-    var nodeColor = "#ffffff";
+    var defaultNodeColor = "#ffffff";
+    var nodeColor = d3.scaleLinear().domain([-1, 0, 10]).range([negativeEdgeColor, "white", positiveEdgeColor])
     var nodeBorderColor = "#333333";
 
     var betweenLayers = 160;
@@ -80,28 +82,35 @@ function FCNN() {
                      showBias_=showBias,
                      showLabels_=showLabels,
                      annexec_={}}={}) {
+        console.log(annexec_);
 
         architecture = architecture_;
         showBias = showBias_;
         showLabels = showLabels_;
 
-        graph.nodes = architecture.map((layer_width, layer_index) => range(layer_width).map(node_index => {return {'id':layer_index+'_'+node_index,'layer':layer_index,'node_index':node_index}}));
+        graph.nodes = architecture.map((layer_width, layer_index) => range(layer_width).map(node_index => {
+            return {
+                'id':layer_index+'_'+node_index,
+                'layer':layer_index,
+                'node_index':node_index,
+                'node_value': (() => {
+                    if (layer_index < architecture.length - 1 && node_index === 0) {
+                        return -1;
+                    } else if (layer_index < architecture.length - 1) {
+                        return annexec_.stages[layer_index+1][node_index-1]
+                    } else {
+                        return annexec_.stages[layer_index+1][node_index]
+                    }
+                })()
+            }
+        }));
         console.log(graph.nodes);
         graph.links = pairWise(graph.nodes).map((nodes) => nodes[0].map(left => nodes[1].map(right => {
             return right.node_index >= 0 ? {
                 'id': left.id+'-'+right.id,
                 'source': left.id,
                 'target': right.id,
-                'weight': (() => {
-                    if (left.layer !== architecture.length - 1) {alert("left can take last value")}
-                    if (left.node_index === 0) {
-                        // take the bias
-                        return annexec_.biases[left.layer][right.node_index-1];
-                    } else {
-                        // take the weight
-                        return annexec_.edgeValues[left.layer][left.node_index-1][right.node_index-1];
-                    }
-                })(),
+                'weight': 0.5
             } : null 
         })));
         graph.nodes = flatten(graph.nodes);
@@ -222,7 +231,6 @@ function FCNN() {
         });
 
         link.style("stroke", function(d) {
-            console.log(d);
             if (edgeColorProportional) { return weightedEdgeColor(d.weight); } else { return defaultEdgeColor; }
         });
 
@@ -231,7 +239,9 @@ function FCNN() {
         arrowhead.style("fill", arrowheadStyle === 'empty' ? "none" : defaultEdgeColor);
 
         node.attr("r", nodeDiameter/2);
-        node.style("fill", nodeColor);
+        node.style("fill", function(d) {
+            if (nodeColorProportional) { let temp = nodeColor(d.node_value); console.log(temp); return temp; } else { return defaultNodeColor; }
+        });
         node.style("stroke", nodeBorderColor);
 
     }

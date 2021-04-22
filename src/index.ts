@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
 import { Observable, interval, fromEvent, animationFrameScheduler, from, merge } from "rxjs";
-import { last, map, mergeMap, publishLast, takeUntil, tap, throttleTime, withLatestFrom, distinctUntilChanged } from 'rxjs/operators';
+import { last, map, mergeMap, publishLast, startWith, takeUntil, tap, throttleTime, withLatestFrom, distinctUntilChanged } from 'rxjs/operators';
 import { inferenceRecord, ANN, ANNExec } from './ann';
 import net from './net.json';
 import { FCNN } from './FCNN.js';
@@ -161,24 +161,22 @@ button.addEventListener('click', (_) => saveFile(arr, 'test.txt'));
 const mouseDown$: Observable<Event> = fromEvent(document, 'mousedown');
 const mouseUp$: Observable<Event> = fromEvent(document, 'mouseup');
 const mouseMove$: Observable<Event> = fromEvent(document, 'mousemove');
-const clickAndDrag$: Observable<Event> = merge(mouseDown$, mouseMove$);
 const frames$: Observable<number> = interval(0, animationFrameScheduler);
 
 mouseDown$.pipe(
-    // get colour
-    map((e) => {
-        const _e = e as MouseEvent;
-        return (getColor(grid.grd, arr, _e) + 1) % 2;
+    mergeMap(md => {
+        const _md = md as MouseEvent;
+        const c: Color = (getColor(grid.grd, arr, _md) + 1) % 2;
+        return mouseMove$.pipe(
+            startWith(md),
+            map(move => {
+                const _e = move as MouseEvent;
+                return { ...getIndex(getMouse(grid.grd, _e)), value: c };
+            }),
+            distinctUntilChanged(),
+            takeUntil(mouseUp$),
+        )
     }),
-    // line up clickAndDrag events with the animation frames
-    mergeMap((c: Color) => clickAndDrag$.pipe(
-        map((move) => {
-            const e = move as MouseEvent;
-            return { ...getIndex(getMouse(grid.grd, e)), value: c };
-        }),
-        distinctUntilChanged(),
-        takeUntil(mouseUp$),
-    )),
 ).subscribe(({i, j, value}) => updatePixel(grid, arr, i, j, value));
 
 // Generate SVG

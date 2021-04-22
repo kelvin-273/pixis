@@ -34,9 +34,10 @@ function innerLayer(x:Vector, w:Matrix, b:Vector): Vector {
 }
 
 function inference(x:Vector, w: Array<Matrix>, b:Array<Vector>): Vector {
-    for (let i = 0; i < w.length; i++) {
+    for (let i = 0; i < w.length-1; i++) {
         x = innerLayer(x, w[i], b[i]);
     }
+    x = linearLayer(x, w[w.length-1], b[b.length-1]);
     return x;
 }
 
@@ -58,10 +59,16 @@ function inferenceRecord(net:ANN, x:Vector): ANNExec {
         stages: new Array(net.nLayers + 1),
         edgeValues: new Array(net.nLayers),
     }
-    for (let i = 0; i < net.nLayers; i++) {
+    for (let i = 0; i < net.nLayers-1; i++) {
         out.stages[i] = [...x];
         out.edgeValues[i] = getEdgeValues(x, net.weights[i]);
         x = innerLayer(x, net.weights[i], net.biases[i]);
+    }
+    {
+        let i = net.nLayers-1;
+        out.stages[i] = [...x];
+        out.edgeValues[i] = getEdgeValues(x, net.weights[i]);
+        x = linearLayer(x, net.weights[i], net.biases[i]);
     }
     out.stages[net.nLayers] = [...x];
     return out

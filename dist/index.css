@@ -1,6 +1,12 @@
 body {
     background-color: white;
     align-content: center;
+    position: fixed;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    font-family: monospace;
 }
 
 canvas {
@@ -13,3 +19,30 @@ footer {
     bottom: 0;
     width: 100%;
 }
+
+.header {
+    text-align: center;
+    box-shadow: black;
+}
+.grid-container {
+    display: inline-grid;
+    grid-template-columns: 0.6fr 1.8fr 0.6fr;
+    grid-template-rows: 1fr;
+    gap: 0px 0px 0px;
+    grid-template-areas:
+        "image network output";
+}
+
+.image {
+    grid-area: image; 
+    margin: auto;
+    display: block;
+    padding: 3rem;
+}
+
+.network {
+    grid-area: network; 
+}
+
+.outut { grid-area: output; }
+

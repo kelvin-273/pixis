@@ -36,7 +36,7 @@ function FCNN() {
     var nodeColorProportional = true;
     var nodeDiameter = 20;
     var defaultNodeColor = "#ffffff";
-    var nodeColor = d3.scaleLinear().domain([-1, 0, 10]).range([negativeEdgeColor, "white", positiveEdgeColor])
+    var nodeColor = d3.scaleLinear().domain([-5, 0, 5]).range([negativeEdgeColor, "white", positiveEdgeColor])
     var nodeBorderColor = "#333333";
 
     var betweenLayers = 160;
@@ -95,13 +95,7 @@ function FCNN() {
                 'layer':layer_index,
                 'node_index':node_index,
                 'node_value': (() => {
-                    if (layer_index < architecture.length - 1 && node_index === 0) {
-                        return -1;
-                    } else if (layer_index < architecture.length - 1) {
-                        return annexec_.stages[layer_index+1][node_index-1]
-                    } else {
-                        return annexec_.stages[layer_index+1][node_index]
-                    }
+                    return annexec_.stages[layer_index+1][node_index]
                 })()
             }
         }));
@@ -241,7 +235,8 @@ function FCNN() {
 
         node.attr("r", nodeDiameter/2);
         node.style("fill", function(d) {
-            if (nodeColorProportional) { let temp = nodeColor(d.node_value); console.log(temp); return temp; } else { return defaultNodeColor; }
+            //if (nodeColorProportional) { let temp = nodeColor(d.node_value); console.log(temp); return temp; } else { return defaultNodeColor; }
+            if (nodeColorProportional) { return nodeColor(d.node_value) } else { return defaultNodeColor; }
         });
         node.style("stroke", nodeBorderColor);
 

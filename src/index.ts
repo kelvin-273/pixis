@@ -183,14 +183,14 @@ mouseDown$.pipe(
 var fcnn = FCNN();
 function restart(netExec: ANNExec | undefined) {
 
-    let architecture = [17, 17, 10];
+    let architecture = [16, 16, 10];
 
     let betweenNodesInLayer = [20, 20, 20];
 
     fcnn.redraw({
         'architecture_':architecture,
-        'showBias_': true,
-        'showLabels_': false,
+        'showBias_': false,
+        'showLabels_': true,
         'annexec_': netExec
     });
     fcnn.redistribute({'betweenNodesInLayer_':betweenNodesInLayer});

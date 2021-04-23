@@ -20,17 +20,41 @@ footer {
     width: 100%;
 }
 
+td {
+    background-color: lightgray;
+    border: thin 1px white;
+    padding: 0.3rem;
+    text-align: center;
+}
+
 .header {
     text-align: center;
     box-shadow: black;
 }
 .grid-container {
-    display: inline-grid;
-    grid-template-columns: 0.6fr 1.8fr 0.6fr;
+    display: grid;
+    height: 100%;
+    grid-template-columns: 0.8fr 0.1fr 0.1fr 1.4fr 0.1fr 0.8fr;
     grid-template-rows: 1fr;
-    gap: 0px 0px 0px;
+    gap: 0px 0px 0px 0px;
     grid-template-areas:
-        "image network output";
+        "image arrow1 input network arrow2 output";
+}
+
+.arrow1 {
+    margin: auto;
+    display: block;
+    grid-area: arrow1;
+}
+
+.arrow2 {
+    margin: auto;
+    display: block;
+    grid-area: arrow2;
+}
+
+.arrow-svg {
+    width: 1rem;
 }
 
 .image {
@@ -40,9 +64,34 @@ footer {
     padding: 3rem;
 }
 
+.input {
+    grid-area: input; 
+    margin: auto;
+    display: block;
+}
+
+.node {
+    width: 20px;
+    padding: 20px;
+}
+
+.ellipsis {
+    width: 8px;
+    padding: 4px;
+}
+
 .network {
     grid-area: network; 
 }
 
-.outut { grid-area: output; }
+.graph-container {
+    height: 100%;
+    width: 100%;
+}
+
+.output {
+    grid-area: output; 
+    margin: auto;
+    display: block;
+}
 

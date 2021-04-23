@@ -41,6 +41,19 @@ function inference(x:Vector, w: Array<Matrix>, b:Array<Vector>): Vector {
     return x;
 }
 
+function argmax(x:Vector) {
+    if (x.length === 0) { return -1; }
+    let out: number = 0;
+    let currMax = x[0];
+    for (let i = 1; i < x.length; i++) {
+        if (x[i] > currMax) {
+            out = i;
+            currMax = x[i];
+        }
+    }
+    return out;
+}
+
 function getEdgeValues(x:Vector, w:Matrix): Matrix {
     let out = new Array(w.length);
     for (let i = 0; i < w.length; i++) {
@@ -85,4 +98,4 @@ function runInference(net:ANN, table:Matrix): ANNExec {
 //console.log(linear([4, 3], [2, 1], 5));
 //console.log(table2Vector([[4,3,6], [7,3,5]]))
 
-export { inferenceRecord, ANN, ANNExec };
+export { inferenceRecord, ANN, ANNExec, argmax };

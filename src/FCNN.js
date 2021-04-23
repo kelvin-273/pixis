@@ -12,12 +12,20 @@ function FCNN() {
                           ///////    Variables    ///////
     /////////////////////////////////////////////////////////////////////////////
 
-    var w = window.innerWidth;
-    var h = window.innerHeight;
+    function getDivDim(div, attr) {
+        var width = d3.select(div)
+        // get the width of div element
+            .style(attr)
+        // take of 'px'
+            .slice(0, -2)
+        // return as an integer
+        return Math.round(Number(width))
+    }
+    var w = getDivDim(".network", "width");
+    var h = getDivDim(".network", "height");
 
     var svg = d3.select("#graph-container").append("svg").attr("xmlns", "http://www.w3.org/2000/svg");
     var g = svg.append("g");
-    //svg.style("cursor", "move");
 
     var edgeWidthProportional = false;
     var edgeWidth = 0.5;
@@ -83,7 +91,6 @@ function FCNN() {
                      showBias_=showBias,
                      showLabels_=showLabels,
                      annexec_={}}={}) {
-        console.log(annexec_);
 
         architecture = architecture_;
         showBias = showBias_;
@@ -99,7 +106,6 @@ function FCNN() {
                 })()
             }
         }));
-        console.log(graph.nodes);
         graph.links = pairWise(graph.nodes).map((nodes) => nodes[0].map(left => nodes[1].map(right => {
             return right.node_index >= 0 ? {
                 'id': left.id+'-'+right.id,
@@ -160,11 +166,19 @@ function FCNN() {
 
         let indices_from_id = (id) => id.split('_').map(x => parseInt(x));
 
-        let x = (layer, node_index) => layer * (betweenLayers + nodeDiameter) + w/2 - (betweenLayers * layer_offsets.length/3);
-        let y = (layer, node_index) => layer_offsets[layer] + node_index * (nodeDiameter + betweenNodesInLayer[layer]) + h/2 - largest_layer_width/2;
+        let x = (layer, node_index) => {
+            return layer * (betweenLayers + nodeDiameter) + w/2 - (betweenLayers * layer_offsets.length/3);
+        };
+        let y = (layer, node_index) => {
+            return layer_offsets[layer] + node_index * (nodeDiameter + betweenNodesInLayer[layer]) + h/2 - largest_layer_width/2
+        };
 
-        let xt = (layer, node_index) => layer_offsets[layer] + node_index * (nodeDiameter + betweenNodesInLayer[layer]) + w/2  - largest_layer_width/2;
-        let yt = (layer, node_index) => layer * (betweenLayers + nodeDiameter) + h/2 - (betweenLayers * layer_offsets.length/3);
+        let xt = (layer, node_index) => {
+            return layer_offsets[layer] + node_index * (nodeDiameter + betweenNodesInLayer[layer]) + w/2  - largest_layer_width/2
+        };
+        let yt = (layer, node_index) => {
+            return layer * (betweenLayers + nodeDiameter) + h/2 - (betweenLayers * layer_offsets.length/3)
+        };
 
         if (nnDirection == 'up') { x = xt; y = yt; }
 
@@ -235,7 +249,6 @@ function FCNN() {
 
         node.attr("r", nodeDiameter/2);
         node.style("fill", function(d) {
-            //if (nodeColorProportional) { let temp = nodeColor(d.node_value); console.log(temp); return temp; } else { return defaultNodeColor; }
             if (nodeColorProportional) { return nodeColor(d.node_value) } else { return defaultNodeColor; }
         });
         node.style("stroke", nodeBorderColor);
@@ -269,8 +282,8 @@ function FCNN() {
     function zoomed() { g.attr("transform", d3.event.transform); }
 
     function resize() {
-        w = window.innerWidth;
-        h = window.innerHeight;
+        const w = d3.select(".network").style("width");
+        const h = d3.select(".network").style("height");
         svg.attr("width", w).attr("height", h);
     }
 

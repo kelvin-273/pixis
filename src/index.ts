@@ -1,10 +1,11 @@
 import * as d3 from 'd3';
 import { Observable, interval, fromEvent, animationFrameScheduler, from, merge } from "rxjs";
 import { last, map, mergeMap, publishLast, startWith, takeUntil, tap, throttleTime, withLatestFrom, distinctUntilChanged } from 'rxjs/operators';
-import { inferenceRecord, ANN, ANNExec } from './ann';
+import { inferenceRecord, ANN, ANNExec, argmax } from './ann';
 import net from './net.json';
 import { FCNN } from './FCNN.js';
 import * as sonic from 'sonic';
+import './arrow';
 
 const SIZE = 28;
 const PIXEL_SIZE = 10;
@@ -132,17 +133,13 @@ function createCanvas(
 }
 
 /**
-* Draw table of outputs
-**/
-function createTable(params:type) {
-    return 0;
-}
-
-/**
 * Update table of outputs
 **/
-function updateTable(params:type) {
-    return 0;
+function updateTable(outputArray: Array<number>) {
+    for (let i = 0; i < outputArray.length; i++) {
+        document.getElementById('val_' + i)!.textContent = ('' + outputArray[i]).slice(0, 6);
+    }
+    document.getElementById('val_pred')!.textContent = '' + argmax(outputArray);
 }
 
 // create internal and external pixel array
@@ -161,7 +158,6 @@ button.addEventListener('click', (_) => saveFile(arr, 'test.txt'));
 const mouseDown$: Observable<Event> = fromEvent(document, 'mousedown');
 const mouseUp$: Observable<Event> = fromEvent(document, 'mouseup');
 const mouseMove$: Observable<Event> = fromEvent(document, 'mousemove');
-const frames$: Observable<number> = interval(0, animationFrameScheduler);
 
 mouseDown$.pipe(
     mergeMap(md => {
@@ -198,16 +194,12 @@ function restart(netExec: ANNExec | undefined) {
 }
 
 let annRec: ANNExec = inferenceRecord(net, arr);
-
+let output = annRec.stages[annRec.nLayers];
 restart(annRec);
-
-console.log(fcnn);
-
-mouseUp$.subscribe((_) => restart(inferenceRecord(net, arr)));
-
-//frames$.pipe(
-//    throttleTime(20),
-//    map((_) => sonic.fast_predict(new Float32Array(arr)))
-//).subscribe(console.log);
-
-export { fcnn as output };
+updateTable(output);
+mouseUp$.subscribe((_) => {
+    const annRec = inferenceRecord(net, arr);
+    restart(annRec);
+    const output = annRec.stages[annRec.nLayers];
+    updateTable(output);
+});

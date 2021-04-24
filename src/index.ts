@@ -4,8 +4,6 @@ import { last, map, mergeMap, publishLast, startWith, takeUntil, tap, throttleTi
 import { inferenceRecord, ANN, ANNExec, argmax } from './ann';
 import net from './net.json';
 import { FCNN } from './FCNN.js';
-import * as sonic from 'sonic';
-import './arrow';
 
 const SIZE = 28;
 const PIXEL_SIZE = 10;

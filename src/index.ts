@@ -133,7 +133,7 @@ function createCanvas(
 /**
 * Update table of outputs
 **/
-function updateTable(outputArray: Array<number>) {
+function updateOutputTable(outputArray: Array<number>) {
     for (let i = 0; i < outputArray.length; i++) {
         document.getElementById('val_' + i)!.textContent = ('' + outputArray[i]).slice(0, 6);
     }
@@ -194,10 +194,10 @@ function restart(netExec: ANNExec | undefined) {
 let annRec: ANNExec = inferenceRecord(net, arr);
 let output = annRec.stages[annRec.nLayers];
 restart(annRec);
-updateTable(output);
+updateOutputTable(output);
 mouseUp$.subscribe((_) => {
     const annRec = inferenceRecord(net, arr);
     restart(annRec);
     const output = annRec.stages[annRec.nLayers];
-    updateTable(output);
+    updateOutputTable(output);
 });

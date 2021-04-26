@@ -49,6 +49,11 @@ function FCNN() {
 
     var betweenLayers = 160;
 
+    const nAboveBelow = 8;
+    const nodesInLayerBeforeSplitting = 20;
+    const ellipsisGap = 3;
+    const elipsisColor = "#000000"
+
     var architecture = [16, 16, 10];
     var betweenNodesInLayer = [20, 20, 20];
     var graph = {};
@@ -63,8 +68,8 @@ function FCNN() {
     let sup_map = {'0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹'};
     let sup = (s) => Array.prototype.map.call(s, (d) => (d in sup_map && sup_map[d]) || d).join('');
 
-    //let textFn = (layer_index, layer_width) => ((layer_index === 0 ? "Input" : (layer_index === architecture.length-1 ? "Output" : "Hidden")) + " Layer ∈ ℝ" + sup(layer_width.toString()));
-    let textFn = (layer_index, layer_width) => ((layer_index === architecture.length-1 ? "Output" : "Hidden") + " Layer ∈ ℝ" + sup(layer_width.toString()));
+    let textFn = (layer_index, layer_width) => ((layer_index === 0 ? "Input" : (layer_index === architecture.length-1 ? "Output" : "Hidden")) + " Layer ∈ ℝ" + sup(layer_width.toString()));
+    //let textFn = (layer_index, layer_width) => ((layer_index === architecture.length-1 ? "Output" : "Hidden") + " Layer ∈ ℝ" + sup(layer_width.toString()));
     var nominal_text_size = 12;
     var textWidth = 70;
 
@@ -82,6 +87,7 @@ function FCNN() {
     var link = g.selectAll(".link");
     var node = g.selectAll(".node");
     var text = g.selectAll(".text");
+    var elip = g.selectAll(".elip");
 
     /////////////////////////////////////////////////////////////////////////////
                           ///////    Methods    ///////
@@ -93,24 +99,67 @@ function FCNN() {
                      annexec_={}}={}) {
 
         architecture = architecture_;
+        const splitList = architecture.map(layer_width => layer_width > 2*nAboveBelow);
         showBias = showBias_;
         showLabels = showLabels_;
 
-        graph.nodes = architecture.map((layer_width, layer_index) => range(layer_width).map(node_index => {
-            return {
-                'id':layer_index+'_'+node_index,
-                'layer':layer_index,
-                'node_index':node_index,
-                'node_value': (() => {
-                    return annexec_.stages[layer_index+1][node_index]
-                })()
-            }
-        }));
+        graph.nodes = architecture.map((layer_width, layer_index) => 
+            range(layer_width).filter((node_index) => {
+                return node_index < nAboveBelow || node_index >= architecture[layer_index] - nAboveBelow;
+            }).map(node_index => {
+                return {
+                    'id':layer_index+'_'+node_index,
+                    'layer':layer_index,
+                    'node_index':node_index,
+                    'relative_node_index': (() => {
+                        if (node_index < nAboveBelow || !splitList[layer_index]) {
+                            return node_index;
+                        } else if (node_index >= architecture[layer_index] - nAboveBelow) {
+                            return nAboveBelow + ellipsisGap + node_index - architecture[layer_index] + nAboveBelow;
+                        } else {
+                            console.log("this shouldn't happen");
+                            return null;
+                        };
+                    })(),
+                    'node_value': (() => {
+                        return annexec_.stages[layer_index][node_index]
+                    })()
+                }
+            })
+        );
+
+        graph.elip = splitList
+            .map((layer_in, layer_index) => ({
+                'id': 'e_' + layer_index,
+                'inclusion': layer_in,
+                'layer': layer_index
+            }))
+            .filter(d => d.inclusion)
+            .flatMap(d => [
+                {
+                    'id': d.id + '_' + 0,
+                    'layer': d.layer,
+                    'part': 0
+                },
+                {
+                    'id': d.id + '_' + 1,
+                    'layer': d.layer,
+                    'part': 1
+                },
+                {
+                    'id': d.id + '_' + 2,
+                    'layer': d.layer,
+                    'part': 2
+                },
+            ]);
+
         graph.links = pairWise(graph.nodes).map((nodes) => nodes[0].map(left => nodes[1].map(right => {
             return right.node_index >= 0 ? {
                 'id': left.id+'-'+right.id,
                 'source': left.id,
                 'target': right.id,
+                'start': left,
+                'end': right,
                 'weight': 0.5
             } : null 
         })));
@@ -122,31 +171,40 @@ function FCNN() {
         link = link.data(graph.links, d => d.id);
         link.exit().remove();
         link = link.enter()
-                   .insert("path", ".node")
-                   .attr("class", "link")
-                   .merge(link);
+            .insert("path", ".node")
+            .attr("class", "link")
+            .merge(link);
 
         node = node.data(graph.nodes, d => d.id);
         node.exit().remove();
         node = node.enter()
-                   .append("circle")
-                   .attr("r", nodeDiameter/2)
-                   .attr("class", "node")
-                   .attr("id", function(d) { return d.id; })
-                   .on("mousedown", set_focus)
-                   .on("mouseup", remove_focus)
-                   .merge(node);
+            .append("circle")
+            .attr("r", nodeDiameter/2)
+            .attr("class", "node")
+            .attr("id", function(d) { return d.id; })
+            .on("mousedown", set_focus)
+            .on("mouseup", remove_focus)
+            .merge(node);
 
         text = text.data(label, d => d.id);
         text.exit().remove();
         text = text.enter()
-                   .append("text")
-                   .attr("class", "text")
-                   .attr("dy", ".35em")
-                   .style("font-size", nominal_text_size+"px")
-                   .merge(text)
-                   .text(function(d) { return (showLabels ? d.text : ""); });
+            .append("text")
+            .attr("class", "text")
+            .attr("dy", ".35em")
+            .style("font-size", nominal_text_size+"px")
+            .merge(text)
+            .text(function(d) { return (showLabels ? d.text : ""); });
 
+        elip.exit().remove();
+        elip = elip.data(graph.elip, d => d.id);
+        elip = elip
+            .enter()
+            .append("circle")
+            .attr("r", nodeDiameter/6)
+            .attr("class", "elip")
+            .attr("id", function(d) { return d.id; })
+            .merge(elip);
         style();
     }
 
@@ -158,13 +216,18 @@ function FCNN() {
         betweenLayers = betweenLayers_;
         nnDirection = nnDirection_;
 
-        let layer_widths = architecture.map((layer_width, i) => layer_width * nodeDiameter + (layer_width - 1) * betweenNodesInLayer[i])
+        let layer_widths = architecture
+            .map((layer_width, i) => layer_width <= nodesInLayerBeforeSplitting 
+                ? layer_width 
+                : 2*nAboveBelow + ellipsisGap)
+            .map((layer_width, i) => layer_width * nodeDiameter + (layer_width - 1) * betweenNodesInLayer[i])
 
         largest_layer_width = Math.max(...layer_widths);
 
         layer_offsets = layer_widths.map(layer_width => (largest_layer_width - layer_width) / 2);
 
         let indices_from_id = (id) => id.split('_').map(x => parseInt(x));
+        let relative_node_indices_from_node = (node) => [node.layer, node.relative_node_index];
 
         let x = (layer, node_index) => {
             return layer * (betweenLayers + nodeDiameter) + w/2 - (betweenLayers * layer_offsets.length/3);
@@ -182,17 +245,19 @@ function FCNN() {
 
         if (nnDirection == 'up') { x = xt; y = yt; }
 
-        node.attr('cx', function(d) { return x(d.layer, d.node_index); })
-            .attr('cy', function(d) { return y(d.layer, d.node_index); });
+        node.attr('cx', function(d) { return x(d.layer, d.relative_node_index); })
+            .attr('cy', function(d) { return y(d.layer, d.relative_node_index); });
 
-        link.attr("d", (d) => "M" + x(...indices_from_id(d.source)) + "," +
-                                    y(...indices_from_id(d.source)) + ", " +
-                                    x(...indices_from_id(d.target)) + "," +
-                                    y(...indices_from_id(d.target)));
+        link.attr("d", (d) => "M" + x(...relative_node_indices_from_node(d.start)) + "," +
+                                    y(...relative_node_indices_from_node(d.start)) + ", " +
+                                    x(...relative_node_indices_from_node(d.end)) + "," +
+                                    y(...relative_node_indices_from_node(d.end)));
 
         text.attr("x", function(d) { return (nnDirection === 'right' ? x(d.layer, d.node_index) - textWidth/2 : w/2 + largest_layer_width/2 + 20 ); })
             .attr("y", function(d) { return (nnDirection === 'right' ? h/2 + largest_layer_width/2 + 20       : y(d.layer, d.node_index) ); });
 
+        elip.attr('cx', function(d) { return x(d.layer, d.relative_node_index); })
+            .attr('cy', d => h/2 + (2*nodeDiameter/3)*(d.part - 2));
     }
 
     function style({
@@ -210,6 +275,7 @@ function FCNN() {
         showArrowheads_=showArrowheads,
         arrowheadStyle_=arrowheadStyle}={}
     ) {
+        //svg.transition().duration(0).style("opacity", 0);
         // Edge Width
         edgeWidthProportional   = edgeWidthProportional_;
         edgeWidth               = edgeWidth_;
@@ -252,6 +318,12 @@ function FCNN() {
             if (nodeColorProportional) { return nodeColor(d.node_value) } else { return defaultNodeColor; }
         });
         node.style("stroke", nodeBorderColor);
+
+        elip.attr("r", nodeDiameter/6);
+        elip.style("fill", function(d) {
+            return elipsisColor;
+        });
+        //svg.transition().duration(200).style("opacity", 1);
 
     }
 

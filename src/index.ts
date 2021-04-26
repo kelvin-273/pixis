@@ -177,9 +177,9 @@ mouseDown$.pipe(
 var fcnn = FCNN();
 function restart(netExec: ANNExec | undefined) {
 
-    let architecture = [16, 16, 10];
+    let architecture = [SIZE*SIZE, 16, 16, 10];
 
-    let betweenNodesInLayer = [20, 20, 20];
+    let betweenNodesInLayer = [20, 20, 20, 20];
 
     fcnn.redraw({
         'architecture_':architecture,

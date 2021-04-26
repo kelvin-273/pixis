@@ -34,11 +34,11 @@ td {
 .grid-container {
     display: grid;
     height: 100%;
-    grid-template-columns: 0.8fr 0.1fr 0.1fr 1.4fr 0.1fr 0.8fr;
+    grid-template-columns: 0.8fr 0.1fr 1.4fr 0.1fr 0.8fr;
     grid-template-rows: 1fr;
     gap: 0px 0px 0px 0px;
     grid-template-areas:
-        "image arrow1 input network arrow2 output";
+        "image arrow1 network arrow2 output";
 }
 
 .arrow1 {
@@ -64,20 +64,9 @@ td {
     padding: 3rem;
 }
 
-.input {
-    grid-area: input; 
-    margin: auto;
-    display: block;
-}
-
 .node {
     width: 20px;
     padding: 20px;
-}
-
-.ellipsis {
-    width: 8px;
-    padding: 4px;
 }
 
 .network {

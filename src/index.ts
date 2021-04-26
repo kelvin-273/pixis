@@ -35,8 +35,8 @@ function drawPixel(
     g: Canvas, table: Table, i: number, j: number
 ) {
     let k = i*g.cols + j;
-    let x = g.gapSize + (g.pixSize + g.gapSize) * i;
-    let y = g.gapSize + (g.pixSize + g.gapSize) * j;
+    let x = g.gapSize + (g.pixSize + g.gapSize) * j;
+    let y = g.gapSize + (g.pixSize + g.gapSize) * i;
     g.ctx.clearRect(x, y, g.pixSize, g.pixSize);
     g.ctx.fillRect(x, y, g.pixSize, g.pixSize);
     g.ctx.fillStyle = table[k] === 1 ? '#FFF' : '#000';
@@ -49,8 +49,8 @@ async function updatePixel(
 ) {
     let k = i*g.cols + j;
     table[k] = value;
-    let x = g.gapSize + (g.pixSize + g.gapSize) * i;
-    let y = g.gapSize + (g.pixSize + g.gapSize) * j;
+    let x = g.gapSize + (g.pixSize + g.gapSize) * j;
+    let y = g.gapSize + (g.pixSize + g.gapSize) * i;
     g.ctx.clearRect(x, y, g.pixSize, g.pixSize);
     g.ctx.fillRect(x, y, g.pixSize, g.pixSize);
     g.ctx.fillStyle = value === 1 ? '#FFF' : '#000';
@@ -72,8 +72,8 @@ function getMouse(svg:HTMLElement, e: MouseEvent): MousePos {
 
 function getIndex(pos: MousePos): MouseIdx {
     return {
-        i: Math.floor(pos.x / (PIXEL_SIZE + GAP_SIZE)),
-        j: Math.floor(pos.y / (PIXEL_SIZE + GAP_SIZE)),
+        i: Math.floor(pos.y / (PIXEL_SIZE + GAP_SIZE)),
+        j: Math.floor(pos.x / (PIXEL_SIZE + GAP_SIZE)),
     }
 }
 

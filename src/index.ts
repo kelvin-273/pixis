@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
 import { Observable, interval, fromEvent, animationFrameScheduler, from, merge } from "rxjs";
-import { last, map, mergeMap, publishLast, startWith, takeUntil, tap, throttleTime, withLatestFrom, distinctUntilChanged } from 'rxjs/operators';
+import { last, map, filter, mergeMap, publishLast, startWith, takeUntil, tap, throttleTime, withLatestFrom, distinctUntilChanged } from 'rxjs/operators';
 import { inferenceRecord, ANN, ANNExec, argmax } from './ann';
 import net from './net.json';
 import { FCNN } from './FCNN.js';
@@ -167,6 +167,7 @@ mouseDown$.pipe(
                 const _e = move as MouseEvent;
                 return { ...getIndex(getMouse(grid.grd, _e)), value: c };
             }),
+            filter(({value, i, j}) => 0 <= i && i < SIZE && 0 <= j && j < SIZE),
             distinctUntilChanged(),
             takeUntil(mouseUp$),
         )

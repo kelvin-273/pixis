@@ -11,6 +11,13 @@ body {
 
 canvas {
     background-color: lightblue;
+    cursor: crosshair;
+}
+
+#canvas {
+    display: inline-block;
+    border: 0.3rem solid black;
+    background-color: black;
 }
 
 footer {

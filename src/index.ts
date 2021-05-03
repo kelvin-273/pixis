@@ -38,8 +38,9 @@ function drawPixel(
     let x = g.gapSize + (g.pixSize + g.gapSize) * j;
     let y = g.gapSize + (g.pixSize + g.gapSize) * i;
     g.ctx.clearRect(x, y, g.pixSize, g.pixSize);
+    g.ctx.fillStyle = table[k] === 1 ? '#000' : '#FFF';
     g.ctx.fillRect(x, y, g.pixSize, g.pixSize);
-    g.ctx.fillStyle = table[k] === 1 ? '#FFF' : '#000';
+    console.log(g.ctx.fillStyle);
     g.ctx.fill();
     g.ctx.closePath();
 }
@@ -53,7 +54,7 @@ async function updatePixel(
     let y = g.gapSize + (g.pixSize + g.gapSize) * i;
     g.ctx.clearRect(x, y, g.pixSize, g.pixSize);
     g.ctx.fillRect(x, y, g.pixSize, g.pixSize);
-    g.ctx.fillStyle = value === 1 ? '#FFF' : '#000';
+    g.ctx.fillStyle = value === 1 ? '#000' : '#FFF';
     g.ctx.fill();
     g.ctx.closePath();
 }
@@ -65,8 +66,8 @@ function getColor(svg: HTMLElement, table: Table, e: MouseEvent) {
 
 function getMouse(svg:HTMLElement, e: MouseEvent): MousePos {
     return {
-        x: e.pageX - svg.getBoundingClientRect().left,
-        y: e.pageY - svg.getBoundingClientRect().top
+        x: e.clientX - svg.getBoundingClientRect().left,
+        y: e.clientY - svg.getBoundingClientRect().top
     }
 }
 
@@ -144,7 +145,6 @@ function updateOutputTable(outputArray: Array<number>) {
 const arr = initTable(SIZE);
 
 var grid = createCanvas(SIZE, SIZE, PIXEL_SIZE, GAP_SIZE, arr);
-//var array = createCanvas(1, SIZE*SIZE, PIXEL_SIZE/5, GAP_SIZE/5, arr);
 
 // create button to save file
 const button = document.getElementById('button')!;

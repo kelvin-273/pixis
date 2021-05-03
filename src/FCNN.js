@@ -74,9 +74,9 @@ function FCNN() {
         if (layer_index === 0) {
             return "Input Layer ∈ {0,1}" + sup(layer_width.toString());
         } else if (layer_index === architecture.length-1) {
-            return "Hidden Layer ∈ ℝ" + sup(layer_width.toString());
-        } else {
             return "Output Layer ∈ ℝ" + sup(layer_width.toString());
+        } else {
+            return "Hidden Layer ∈ ℝ" + sup(layer_width.toString());
         }
     };
     var nominal_text_size = 12;

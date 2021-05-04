@@ -15,7 +15,7 @@ canvas {
 }
 
 #canvas {
-    display: inline-block;
+    display: inline-flex;
     border: 0.3rem solid black;
     background-color: black;
 }
@@ -32,6 +32,7 @@ td {
     border: thin 1px white;
     padding: 0.3rem;
     text-align: center;
+    min-width: 5rem;
 }
 
 .header {
@@ -67,13 +68,20 @@ td {
 .image {
     grid-area: image; 
     margin: auto;
-    display: block;
     padding: 3rem;
+    width: 330px;
 }
 
-.node {
-    width: 20px;
-    padding: 20px;
+.canvas-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.button {
+    margin: 0.3rem;
 }
 
 .network {

@@ -4,6 +4,7 @@ import { last, map, filter, mergeMap, publishLast, startWith, takeUntil, tap, th
 import { inferenceRecord, ANN, ANNExec, argmax } from './ann';
 import net from './net.json';
 import { FCNN } from './FCNN.js';
+//import { loadFile_aux } from './loadFile.js';
 
 const SIZE = 28;
 const PIXEL_SIZE = 10;
@@ -25,7 +26,7 @@ interface Canvas {
 function initTable(size:number): Table {
     // creates a nxn array
     const arr: Array<number> = new Array(size*size);
-    for (let k = 0; k < SIZE*SIZE; k++) {
+    for (let k = 0; k < size*size; k++) {
         arr[k] = 0;
     }
     return arr;
@@ -40,7 +41,6 @@ function drawPixel(
     g.ctx.clearRect(x, y, g.pixSize, g.pixSize);
     g.ctx.fillStyle = table[k] === 1 ? '#000' : '#FFF';
     g.ctx.fillRect(x, y, g.pixSize, g.pixSize);
-    console.log(g.ctx.fillStyle);
     g.ctx.fill();
     g.ctx.closePath();
 }
@@ -53,8 +53,8 @@ async function updatePixel(
     let x = g.gapSize + (g.pixSize + g.gapSize) * j;
     let y = g.gapSize + (g.pixSize + g.gapSize) * i;
     g.ctx.clearRect(x, y, g.pixSize, g.pixSize);
-    g.ctx.fillRect(x, y, g.pixSize, g.pixSize);
     g.ctx.fillStyle = value === 1 ? '#000' : '#FFF';
+    g.ctx.fillRect(x, y, g.pixSize, g.pixSize);
     g.ctx.fill();
     g.ctx.closePath();
 }
@@ -101,6 +101,22 @@ function saveFile(table: Table, filename: string) {
     document.removeChild(anchor);
 }
 
+function loadFileBodge(table: Table) {
+    let xs = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    for (let k = 0; k < xs.length; k++) {
+        table[k] = xs[k];
+    }
+    return table
+}
+
+function refresh(g: Canvas, table: Table) {
+    for (let i = 0; i < SIZE; i++) {
+        for (let j = 0; j < SIZE; j++) {
+            updatePixel(g, table, i, j, 0)
+        }
+    }
+}
+
 // create canvas
 function createCanvas(
     rows: number,
@@ -143,14 +159,9 @@ function updateOutputTable(outputArray: Array<number>) {
 
 // create internal and external pixel array
 const arr = initTable(SIZE);
+loadFileBodge(arr);
 
 var grid = createCanvas(SIZE, SIZE, PIXEL_SIZE, GAP_SIZE, arr);
-
-// create button to save file
-const button = document.getElementById('button')!;
-button.addEventListener('click', (_) => saveFile(arr, 'test.txt'));
-
-// TODO: create button to start fresh
 
 // create the Observable streams
 const mouseDown$: Observable<Event> = fromEvent(document, 'mousedown');
@@ -202,3 +213,43 @@ mouseUp$.subscribe((_) => {
     const output = annRec.stages[annRec.nLayers];
     updateOutputTable(output);
 });
+
+// create button to save file
+const saveFileButton = document.getElementById('saveFile')!;
+saveFileButton.addEventListener('click', (_) => saveFile(arr, 'image.txt'));
+
+// // create button to load file
+// const loadFileButton = document.getElementById('loadFile')!;
+// loadFileButton.addEventListener('change', (event) => {
+//     // the loading
+//     loadFile_aux(event, grid, arr);
+//     
+//     // render output
+//     annRec = inferenceRecord(net, arr);
+//     restart(annRec);
+//     output = annRec.stages[annRec.nLayers];
+//     updateOutputTable(output);
+// });
+
+// create button to refresh the state
+const refreshButton = document.getElementById('refresh')!;
+refreshButton.addEventListener('click', (_) => {
+    // clean the image
+    for (let i = 0; i < SIZE; i++) {
+        for (let j = 0; j < SIZE; j++) {
+            updatePixel(grid, arr, i, j, 0);
+        }
+    }
+    // render output
+    annRec = inferenceRecord(net, arr);
+    restart(annRec);
+    output = annRec.stages[annRec.nLayers];
+    updateOutputTable(output);
+});
+
+// // Check for the various File API support.
+// if (window.File && window.FileReader && window.FileList && window.Blob) {
+//   // Great success! All the File APIs are supported.
+// } else {
+//   alert('The File APIs are not fully supported in this browser.');
+// }

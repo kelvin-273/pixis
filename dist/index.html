@@ -10,12 +10,23 @@
 <body>
     <div class="header">
         <h1>Pixis</h1>
+        <p>
+        A visualisation of the Artificial Neural Network featured in Assignment 1 & 2 and its decision making process.
+        </p>
+        <p>
+        Each node is colour coded based on their activations with positive activations shown in <span style="color=red;">red</span> and negative activations shown in <span style="color=blue;">blue</span>.
+        </p>
         <p>Click and drag any pixel to begin.</p>
     </div>
     <div class="grid-container">
         <div class="image">
-            <div id='canvas'></div>
-            <button id='button'>Save File</button>
+            <div id="canvas"></div>
+            <div class="canvas-container">
+                <button id="refresh" class="button">Refresh</button>
+                <button id="saveFile" class="button">Save</button>
+                <!--<input type="file" name="loadedFile" id="loadFile" class="button">-->
+                <!--<button id="loadFile">Load File</button>-->
+            </div>
         </div>
         <div class="arrow1">
             <img class="arrow-svg" src="./method-draw-image.svg" alt="arrow" srcset="">
@@ -87,7 +98,7 @@
             </div>
         </div>
     </div>
-    <footer>Developed by Kelvin Davis for FIT1045</footer>
+    <footer>Developed by Kelvin Davis</footer>
     <script src="./bundle.js"></script>
 </body>
 </html>

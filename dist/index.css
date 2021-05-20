@@ -82,6 +82,12 @@ td {
     margin: 0.3rem;
 }
 
+.mouse-stats {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+
 .network {
     grid-area: network; 
 }

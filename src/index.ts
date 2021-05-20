@@ -168,6 +168,20 @@ const mouseDown$: Observable<Event> = fromEvent(document, 'mousedown');
 const mouseUp$: Observable<Event> = fromEvent(document, 'mouseup');
 const mouseMove$: Observable<Event> = fromEvent(document, 'mousemove');
 
+mouseMove$.pipe(
+    map(move => {
+        const _e = move as MouseEvent;
+        const {i, j} = getIndex(getMouse(grid.grd, _e));
+        return {row: i, col: j, pix: SIZE*i + j};
+    }),
+    filter(({row, col, pix}) => 0 <= row && row < SIZE && 0 <= col && col < SIZE),
+    distinctUntilChanged(),
+).subscribe(({row, col, pix}) => {
+    document.getElementById("mouse-row")!.textContent = row.toString();
+    document.getElementById("mouse-col")!.textContent = col.toString();
+    document.getElementById("mouse-pix")!.textContent = pix.toString();
+});
+
 mouseDown$.pipe(
     mergeMap(md => {
         const _md = md as MouseEvent;

@@ -9,17 +9,6 @@ body {
     font-family: monospace;
 }
 
-canvas {
-    background-color: lightblue;
-    cursor: crosshair;
-}
-
-#canvas {
-    display: inline-flex;
-    border: 0.3rem solid black;
-    background-color: black;
-}
-
 footer {
     position: fixed;
     left: 0;
@@ -68,10 +57,32 @@ td {
 .image {
     grid-area: image; 
     margin: auto;
-    padding: 3rem;
 }
 
-.canvas-container {
+.mouse-stats {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+
+.canvas-wrapper {
+    display: flex;
+    justify-content: center;
+}
+
+#canvas {
+    display: inline-flex;
+    border: 0.3rem solid black;
+    background-color: black;
+}
+
+canvas {
+    background-color: lightblue;
+    cursor: crosshair;
+    padding: auto;
+}
+
+.button-list {
     display: flex;
     flex-direction: column;
     align-items: stretch;
@@ -80,12 +91,6 @@ td {
 
 .button {
     margin: 0.3rem;
-}
-
-.mouse-stats {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-evenly;
 }
 
 .network {

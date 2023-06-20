@@ -1,5 +1,5 @@
 # pixis
-A web app to help FIT1045 students generate example images for their Neral Networks. Built on Typescript and RxJs.
+A web app to help FIT1045 students generate example images for their Neural Networks. Built on Typescript and RxJs.
 
 ## How to use
 
